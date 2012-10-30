@@ -116,10 +116,13 @@ func main() {
 	
 	initGl()
 	
-	c := time.Tick(1 * time.Second)
+	c := time.Tick(60 * time.Second)
 	
 	openWindow()
 	
-	loadScene(flag.Args()[0])
+	_, err := loadScene(flag.Args()[0])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading scene: %v\n", err)
+	}
 	loop(c)
 }

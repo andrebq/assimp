@@ -55,6 +55,11 @@ func (n *Node) UseMesh(m *Mesh, s *Scene) {
 }
 
 // Hold the Mesh information
-// Vertex, Textures and Normals
+// Vertices, Textures and Normals
 type Mesh struct {
+	// List of vertices
+	Vertices []Vector3
 }
+
+// A 3d Vertex
+type Vector3 [3]float64

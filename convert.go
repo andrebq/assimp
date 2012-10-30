@@ -5,7 +5,9 @@ package main
 // #include <assimp/scene.h>
 // #include <assimp/cimport.h>
 // #include <assimp/postprocess.h>
+// #include <assimp/vector3.h>
 // #include <stdlib.h>
+// #include "aiw_helper.h"
 import "C"
 
 import (
@@ -16,7 +18,29 @@ import (
 
 // Convert a Scene from Assimp to a Go structure.
 func convertAiScene(scenePtr unsafe.Pointer) (gScene *Scene) {
-	return nil
+	gScene = &Scene{}
+	cScene := (*C.struct_aiScene)(scenePtr)
+	gScene.Mesh = make([]*Mesh, 0, cScene.mNumMeshes)
+	convertAiMesh(gScene, scenePtr)
+	return
+}
+
+// convert all the mesh objects from the scene
+func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
+	cScene := (*C.struct_aiScene)(scenePtr)
+	numMeshes := uint(cScene.mNumMeshes)
+	for i := uint(0); i < numMeshes; i++ {
+		gMesh := &Mesh{}
+		cMesh := (*C.struct_aiMesh)(C.aiw_read_mesh(cScene, C.uint(i)))
+		gMesh.Vertices = make([]Vector3, cMesh.mNumVertices)
+		for i, _ := range gMesh.Vertices {
+			cVector3d := (*C.struct_aiVector3D)(C.aiw_read_vec(cMesh, C.uint(i)))
+			gMesh.Vertices[i][0] = float64(cVector3d.x)
+			gMesh.Vertices[i][1] = float64(cVector3d.y)
+			gMesh.Vertices[i][2] = float64(cVector3d.z)
+			println("vector")
+		}
+	}
 }
 
 // load the assent in the given path
