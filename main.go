@@ -9,20 +9,10 @@
 // You will need SDL, GL and GLU installed.
 package main
 
-//#cgo pkg-config: assimp
-//#include <assimp/cimport.h>
-//#include <assimp/scene.h>
-//#include <assimp/postprocess.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-import "C"
-
 import (
-	"unsafe"
 	"os"
 	"fmt"
 	"time"
-	"errors"
 	"flag"
 	
 	// opengl related imports
@@ -105,29 +95,11 @@ func openWindow() {
 	}
 }
 
-// load the assent in the given path
-func loadAsset(path string) (scene unsafe.Pointer, err error) {
-	cs := C.CString(path)
-	defer C.free(unsafe.Pointer(cs))
-	csScene := C.aiImportFile(cs, C.aiProcessPreset_TargetRealtime_MaxQuality)
-	if (uintptr(unsafe.Pointer(csScene)) == 0) {
-		err = errors.New(fmt.Sprintf("Unable to load %v.\n", path))
-	} else {
-		scene = unsafe.Pointer(csScene)
-	}
-	return
-}
-
 // Load the scene into the system.
-func loadScene(file string) {
-	scene, err := loadAsset(file)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
-		os.Exit(1)
-	} else {
-		fmt.Fprintf(os.Stderr, "Scene loaded.\n")
-	}
-	defer C.free(scene)
+func loadScene(file string) (*Scene, error) {
+	cScene, err := loadAsset(file)
+	if err != nil { return nil, err }
+	return convertAiScene(cScene), nil
 }
 
 func main() {
@@ -137,10 +109,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "You must provide the name of the file to import.\n")
 		os.Exit(1)
 	}
-	
-	cs := C.CString("hi there\n")
-	defer C.free(unsafe.Pointer(cs))
-	C.fputs(cs, (*C.FILE)(C.stdout))
 	
 	initGlfw()
 	
