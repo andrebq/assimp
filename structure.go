@@ -1,6 +1,17 @@
 // This file contains the strucutres used in the program
-
 package main
+
+// Represent an error in the structure of a scene/node.
+type Error string
+
+// Error interface
+func (e Error) Error() string {
+	return string(e)
+}
+
+const (
+	ErrMeshNotFound = Error("Unable to find the given mesh in the Scene")
+)
 
 // The Scene object, hold the root node of the scene and 
 // the list of meshes
@@ -22,14 +33,14 @@ func (s *Scene) AddMesh(m *Mesh) {
 }
 
 // Index of the given mesh
-func (s *Scene) IndexOfMesh(m *Mesh) (idx int, has bool) {
+func (s *Scene) IndexOfMesh(m *Mesh) (idx int, err error) {
 	for i, v := range s.Mesh {
 		if v == m {
 			idx = i
-			has = true
 			return
 		}
 	}
+	err = ErrMeshNotFound
 	return
 }
 
@@ -51,7 +62,12 @@ func (n *Node) AddMeshIndex(i int) {
 }
 
 // Use the given mesh from the given scene
-func (n *Node) UseMesh(m *Mesh, s *Scene) {
+func (n *Node) UseMesh(m *Mesh, s *Scene) (err error){
+	var idx int
+	if idx, err = s.IndexOfMesh(m); err == nil {
+		n.AddMeshIndex(idx)
+	}
+	return
 }
 
 // Hold the Mesh information
@@ -59,6 +75,16 @@ func (n *Node) UseMesh(m *Mesh, s *Scene) {
 type Mesh struct {
 	// List of vertices
 	Vertices []Vector3
+	
+	// List of faces
+	Faces []*Face
+}
+
+// Hold the information of a single face.
+// Hold only the pointers to the vector stored in the Mesh
+type Face struct {
+	// List of vector indices
+	Indices []int
 }
 
 // A 3d Vertex
