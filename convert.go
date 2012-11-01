@@ -57,15 +57,24 @@ func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
 	}
 }
 
-// load the assent in the given path
-func loadAsset(path string) (scene unsafe.Pointer, err error) {
+// Load the assent from the given path. 
+//
+// All resources are dealocated before returning.
+func loadAsset(path string) (*Scene, error) {	
+	var err error
 	cs := C.CString(path)
 	defer C.free(unsafe.Pointer(cs))
-	csScene := C.aiImportFile(cs, C.aiProcessPreset_TargetRealtime_MaxQuality)
-	if (uintptr(unsafe.Pointer(csScene)) == 0) {
+	cScene := C.aiImportFile(cs, C.aiProcessPreset_TargetRealtime_MaxQuality)
+	if (uintptr(unsafe.Pointer(cScene)) == 0) {
 		err = errors.New(fmt.Sprintf("Unable to load %v.\n", path))
-	} else {
-		scene = unsafe.Pointer(csScene)
+		return nil, err
 	}
-	return
+	defer func() {
+		C.aiReleaseImport(cScene)
+		// with the next line the program aborts when C.free is called
+		// but removing this line should lead to memory leaky (investigate this)
+		//C.free(unsafe.Pointer(cScene))
+	}()
+	
+	return convertAiScene(unsafe.Pointer(cScene)), nil
 }

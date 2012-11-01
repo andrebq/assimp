@@ -97,9 +97,7 @@ func openWindow() {
 
 // Load the scene into the system.
 func loadScene(file string) (*Scene, error) {
-	cScene, err := loadAsset(file)
-	if err != nil { return nil, err }
-	return convertAiScene(cScene), nil
+	return loadAsset(file)
 }
 
 func main() {
