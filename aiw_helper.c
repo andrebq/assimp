@@ -9,8 +9,7 @@
 // return the vector information on the given index
 struct aiVector3D* aiw_read_vec(struct aiMesh* m, unsigned int index)
 {
-	unsigned int offset = index * sizeof(struct aiVector3D);
-	return &(m->mVertices[offset]);
+	return &(m->mVertices[index]);
 }
 
 // return the mesh on the given index
@@ -22,8 +21,7 @@ struct aiMesh* aiw_read_mesh(struct aiScene* s, unsigned int index)
 // return the face on the given index
 struct aiFace* aiw_read_face(struct aiMesh* m, unsigned int index)
 {
-	unsigned int offset = index * sizeof(struct aiVector3D);
-	return &(m->mFaces[offset]);
+	return &(m->mFaces[index]);
 }
 
 // return the vertex index (from the mesh list) that correspond's to
@@ -33,7 +31,5 @@ struct aiFace* aiw_read_face(struct aiMesh* m, unsigned int index)
 // that correspond's to the face's first element
 unsigned int aiw_read_vec_index_from_face(struct aiFace* f, unsigned int index)
 {
-	unsigned int offset = index * sizeof(unsigned int);
-	printf("Reading index: %d. Offset: %d\n", index, offset);
 	return f->mIndices[index];
 }

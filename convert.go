@@ -44,11 +44,13 @@ func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
 		
 		// reading mesh faces
 		gMesh.Faces = make([]*Face, int(cMesh.mNumFaces))
+		println("c face count: ", int(cMesh.mNumFaces))
+		println("face count: ", len(gMesh.Faces))
 		for i, _ := range gMesh.Faces {
 			cFace := (*C.struct_aiFace)(C.aiw_read_face(cMesh, C.uint(i)))
 			gFace := &Face{Indices:make([]int, int(cFace.mNumIndices))}
 			for j, _ := range gFace.Indices {
-				gFace.Indices[i] = int(C.aiw_read_vec_index_from_face(cFace, C.uint(j)))
+				gFace.Indices[j] = int(C.aiw_read_vec_index_from_face(cFace, C.uint(j)))
 				println("face")
 			}
 		}
