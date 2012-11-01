@@ -6,7 +6,7 @@
 // The code here is basically a translation from the
 // Sample_SimpleOpenGL.c
 //
-// You will need SDL, GL and GLU installed.
+// You will need GLFW, GL and GLU installed.
 package main
 
 import (
