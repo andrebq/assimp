@@ -64,16 +64,13 @@ func loadAsset(path string) (*Scene, error) {
 	var err error
 	cs := C.CString(path)
 	defer C.free(unsafe.Pointer(cs))
-	cScene := C.aiImportFile(cs, C.aiProcessPreset_TargetRealtime_MaxQuality)
+	cScene := C.aiw_import_file(cs, C.aiProcessPreset_TargetRealtime_MaxQuality)
 	if (uintptr(unsafe.Pointer(cScene)) == 0) {
 		err = errors.New(fmt.Sprintf("Unable to load %v.\n", path))
 		return nil, err
 	}
 	defer func() {
-		C.aiReleaseImport(cScene)
-		// with the next line the program aborts when C.free is called
-		// but removing this line should lead to memory leaky (investigate this)
-		//C.free(unsafe.Pointer(cScene))
+		C.aiw_release_scene(cScene)
 	}()
 	
 	return convertAiScene(unsafe.Pointer(cScene)), nil
