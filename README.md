@@ -6,8 +6,7 @@ The model used "Bob.blend" is the same released in the assimp SDK, see the bob.s
 
 # How it works
 
-The code load the model using assimp then convert it to pure Go representation, using the Go representation,
-the model is rendered using OpenGL/GLFW.
+The code load the model using assimp then convert it to pure Go representation, using the Go representation, the model is rendered using OpenGL/GLFW.
 
 # Go Dependencies
 
@@ -21,7 +20,6 @@ the model is rendered using OpenGL/GLFW.
 * GLEW (http://glew.sourceforge.net/ - 1.7.0) -> I had to configure my LD_LIBRARY_PATH to search for /usr/lib64 in order to start the program.
 * OpenGL (libgl1-mesa-dev/dri/glx) and GLU (libglu1-mesa-dev) -> install from your own linux distribution
 
-I compiled assimp/glfw/glew using the standard configuration, note that GLEW installs under /usr/lib (or /usr/lib64 in my case),
-the others go under /usr/local.
+I compiled assimp/glfw/glew using the standard configuration, note that GLEW installs under /usr/lib (or /usr/lib64 in my case), the others go under /usr/local.
 
 
