@@ -1,10 +1,8 @@
 // Open Asset Importer -> Sample OpenGL Viewer
 //
-// This is a sample application to check if cgo is capable of linking to
-// Open Asset Importer (http://assimp.sourceforge.net/)
+// This is a sample application to check if cgo is capable of linking to Open Asset Importer (http://assimp.sourceforge.net/)
 //
-// The code here is basically a translation from the
-// Sample_SimpleOpenGL.c
+// The code here is basically a translation from the Sample_SimpleOpenGL.c
 //
 // You will need GLFW, GL and GLU installed.
 package main
