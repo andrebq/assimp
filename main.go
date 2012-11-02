@@ -62,15 +62,58 @@ func initGl() {
 }
 
 // draw the mesh on the window
-func drawScene() {
-	// do nothing for the moment
-	//
-	// later render the object.
+func drawScene(sc *Scene) {
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	gl.LoadIdentity()
+	glu.LookAt(0.0, 0.0, 3.0, 0.0, 0.0, -5.0, 0.0, 1.0, 0.0);
+	
+	gl.Translatef(0,0,0)
+
+	/*gl.Begin(gl.TRIANGLES)
+	gl.Color3f(0.5, 0.5, 1.0)
+	gl.Vertex3f(1.0, 1.0, 0)
+	gl.Vertex3f(0.0, 1.0, 0)
+	gl.Vertex3f(1.0, 0.0, 0)
+	gl.End()
+
+	glfw.SwapBuffers()
+	*/
+	for _, m := range sc.Mesh {
+		for _, f := range m.Faces {
+			if f == nil || f.Indices == nil { continue }
+			mode := gl.POLYGON
+			switch len(f.Indices) {
+				case 1: mode = gl.POINT
+				case 2: mode = gl.LINE
+				case 3: mode = gl.TRIANGLES
+			}
+			gl.Begin(gl.GLenum(mode))
+			
+			if m.HasNormals() {
+				gl.Enable(gl.LIGHTING)
+			} else {
+				gl.Disable(gl.LIGHTING)
+			}
+			
+			for _, vI := range f.Indices {				
+				gl.Color3b(100, 100, 100)
+				
+				if m.HasNormals() {
+					gl.Normal3dv(m.Normals[vI][:])
+				}
+				gl.Vertex3dv(m.Vertices[vI][:])
+			}
+			
+			
+			gl.End()
+		}
+	}
+	glfw.SwapBuffers()
 }
 
 // run the program until the user close's the window or 
 // the given timeout is reached.
-func loop(timeout <-chan time.Time) {
+func loop(timeout <-chan time.Time, scene *Scene) {
 	for {
 		select {
 			case <-timeout:
@@ -80,7 +123,7 @@ func loop(timeout <-chan time.Time) {
 					fmt.Printf("out now...\n")
 					return
 				}
-				drawScene()
+				drawScene(scene)
 		}
 	}
 }
@@ -116,9 +159,10 @@ func main() {
 	
 	openWindow()
 	
-	_, err := loadScene(flag.Args()[0])
+	s, err := loadScene(flag.Args()[0])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading scene: %v\n", err)
+		os.Exit(1)
 	}
-	loop(c)
+	loop(c, s)
 }

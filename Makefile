@@ -1,3 +1,3 @@
 all:
 	@@go build .
-	@@./assimp cube.blend
+	@@./assimp cube.dae

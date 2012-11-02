@@ -83,6 +83,11 @@ type Mesh struct {
 	Faces []*Face
 }
 
+// Return true if the mesh has normal information
+func (m *Mesh) HasNormals() bool {
+	return m.Normals != nil && len(m.Normals) > 0
+}
+
 // Hold the information of a single face.
 // Hold only the pointers to the vector stored in the Mesh
 type Face struct {
