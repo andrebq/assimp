@@ -8,161 +8,114 @@
 package main
 
 import (
-	"os"
 	"fmt"
-	"time"
-	"flag"
-	
-	// opengl related imports
+	// open gl related
+	"github.com/jteeuwen/glfw"
 	"github.com/banthar/gl"
 	"github.com/banthar/glu"
-	"github.com/jteeuwen/glfw"
+	
+	"math/rand"
+	"os"
 )
 
-// start the glfw library
-func initGlfw() {
-	if err := glfw.Init(); err != nil {
+const (
+	Title  = "Go-wrapper for Open Asset Importer"
+)
+
+var (
+	quadAngle float32
+	running   bool
+	Width  = int(640)
+	Height = int(480)
+)
+
+func main() {
+	var err error
+	if err = glfw.Init(); err != nil {
 		fmt.Fprintf(os.Stderr, "[e] %v\n", err)
-		os.Exit(1)
+		return
 	}
-	
+
+	defer glfw.Terminate()
+
+	if err = glfw.OpenWindow(Width, Height, 8, 8, 8, 8, 0, 8, glfw.Windowed); err != nil {
+		fmt.Fprintf(os.Stderr, "[e] %v\n", err)
+		return
+	}
+
+	defer glfw.CloseWindow()
+
 	glfw.SetSwapInterval(1)
-	glfw.SetWindowTitle("Simple Assim Go binding test")
+	glfw.SetWindowTitle(Title)
 	glfw.SetWindowSizeCallback(onResize)
+	glfw.SetKeyCallback(onKey)
+	
+	if scene, err := loadAsset("cube.dae"); err == nil {
+		initGL()
+
+		running = true
+		for running && glfw.WindowParam(glfw.Opened) == 1 {
+			drawScene(scene)
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "Unable to load scene. Cause: %v", err)
+	}
 }
 
-// handle the resize of the window
 func onResize(w, h int) {
 	if h == 0 {
 		h = 1
 	}
+	
+	Height = h
+	Width = w
 
-	gl.Viewport(0, 0, w, h)
+	gl.Viewport(0, 0, Width, Height)
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
-	glu.Perspective(45.0, float64(w)/float64(h), 0.1, 100.0)
+	glu.Perspective(45.0, float64(Width)/float64(Height), 0.1, 100.0)
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 }
 
-// initialize the opengl context
-func initGl() {
+func onKey(key, state int) {
+	switch key {
+	case glfw.KeyEsc:
+		running = false
+	}
+}
 
-	gl.ClearColor(0.1,0.1,0.1,1.0)
-
-	gl.Enable(gl.LIGHTING)
-	gl.Enable(gl.LIGHT0)    // Uses default lighting parameters
-
+func initGL() {
+	gl.ShadeModel(gl.SMOOTH)
+	gl.ClearColor(0, 0, 0, 0)
+	gl.ClearDepth(1)
 	gl.Enable(gl.DEPTH_TEST)
-
-	gl.LightModeli(gl.LIGHT_MODEL_TWO_SIDE, gl.TRUE)
-	gl.Enable(gl.NORMALIZE)
-
-	gl.ColorMaterial(gl.FRONT_AND_BACK, gl.DIFFUSE)
+	gl.DepthFunc(gl.LEQUAL)
+	gl.Hint(gl.PERSPECTIVE_CORRECTION_HINT, gl.NICEST)
 }
 
-// draw the mesh on the window
-func drawScene(sc *Scene) {
+func drawScene(scene *Scene) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
 	gl.LoadIdentity()
-	glu.LookAt(0.0, 0.0, 3.0, 0.0, 0.0, -5.0, 0.0, 1.0, 0.0);
-	
-	gl.Translatef(0,0,0)
+	gl.Translatef(0, 0, -10)
+	gl.Rotatef(quadAngle, 1, 0, 1)
 
-	/*gl.Begin(gl.TRIANGLES)
-	gl.Color3f(0.5, 0.5, 1.0)
-	gl.Vertex3f(1.0, 1.0, 0)
-	gl.Vertex3f(0.0, 1.0, 0)
-	gl.Vertex3f(1.0, 0.0, 0)
-	gl.End()
-
-	glfw.SwapBuffers()
-	*/
-	for _, m := range sc.Mesh {
+	gl.Begin(gl.TRIANGLES)
+	for _, m := range scene.Mesh {
 		for _, f := range m.Faces {
-			if f == nil || f.Indices == nil { continue }
-			mode := gl.POLYGON
-			switch len(f.Indices) {
-				case 1: mode = gl.POINT
-				case 2: mode = gl.LINE
-				case 3: mode = gl.TRIANGLES
-			}
-			gl.Begin(gl.GLenum(mode))
-			
-			if m.HasNormals() {
-				gl.Enable(gl.LIGHTING)
-			} else {
-				gl.Disable(gl.LIGHTING)
-			}
-			
-			for _, vI := range f.Indices {				
-				gl.Color3b(100, 100, 100)
-				
-				if m.HasNormals() {
-					gl.Normal3dv(m.Normals[vI][:])
+			for _, i := range f.Indices {
+				if i % 2 == 0 {
+					gl.Color3f(rand.Float32(), rand.Float32(), rand.Float32())
 				}
-				gl.Vertex3dv(m.Vertices[vI][:])
+				v := m.Vertices[i]
+				gl.Vertex3d(v[0], v[1], v[2])
 			}
-			
-			
-			gl.End()
 		}
 	}
+	gl.End()
+	
+	quadAngle -= 0.15
+
 	glfw.SwapBuffers()
-}
-
-// run the program until the user close's the window or 
-// the given timeout is reached.
-func loop(timeout <-chan time.Time, scene *Scene) {
-	for {
-		select {
-			case <-timeout:
-				return
-			default:
-				if glfw.WindowParam(glfw.Opened) != 1 {
-					fmt.Printf("out now...\n")
-					return
-				}
-				drawScene(scene)
-		}
-	}
-}
-
-// open the glfw window
-func openWindow() {
-	if err := glfw.OpenWindow(800, 600, 8, 8, 8, 8, 0, 8, glfw.Windowed); err != nil {
-		fmt.Fprintf(os.Stderr, "[e] %v\n", err)
-		os.Exit(1)
-	}
-}
-
-// Load the scene into the system.
-func loadScene(file string) (*Scene, error) {
-	return loadAsset(file)
-}
-
-func main() {
-	flag.Parse()
-	
-	if len(flag.Args()) == 0 {
-		fmt.Fprintf(os.Stderr, "You must provide the name of the file to import.\n")
-		os.Exit(1)
-	}
-	
-	initGlfw()
-	
-	defer glfw.Terminate()
-	
-	initGl()
-	
-	c := time.Tick(60 * time.Second)
-	
-	openWindow()
-	
-	s, err := loadScene(flag.Args()[0])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading scene: %v\n", err)
-		os.Exit(1)
-	}
-	loop(c, s)
 }
