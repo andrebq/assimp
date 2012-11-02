@@ -76,6 +76,9 @@ type Mesh struct {
 	// List of vertices
 	Vertices []Vector3
 	
+	// List of normals
+	Normals []Vector3
+	
 	// List of faces
 	Faces []*Face
 }

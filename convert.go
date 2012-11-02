@@ -42,6 +42,15 @@ func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
 			gMesh.Vertices[i][2] = float64(cVector3d.z)
 		}
 		
+		// reading mesh normals
+		gMesh.Normals = make([]Vector3, int(cMesh.mNumVertices))
+		for i, _ := range gMesh.Normals {
+			cVector3d := (*C.struct_aiVector3D)(C.aiw_read_norm(cMesh, C.uint(i)))
+			gMesh.Normals[i][0] = float64(cVector3d.x)
+			gMesh.Normals[i][1] = float64(cVector3d.y)
+			gMesh.Normals[i][2] = float64(cVector3d.z)
+		}
+		
 		// reading mesh faces
 		gMesh.Faces = make([]*Face, int(cMesh.mNumFaces))
 		println("c face count: ", int(cMesh.mNumFaces))

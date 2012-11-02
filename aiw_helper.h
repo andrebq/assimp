@@ -8,6 +8,9 @@
 // return the vector information on the given index
 struct aiVector3D* aiw_read_vec(struct aiMesh* m, unsigned int index);
 
+// return the normal information on the given index
+struct aiVector3D* aiw_read_norm(struct aiMesh* m, unsigned int index);
+
 // return the mesh on the given index
 struct aiMesh* aiw_read_mesh(struct aiScene* s, unsigned int index);
 
