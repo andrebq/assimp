@@ -32,14 +32,14 @@ var (
 func main() {
 	var err error
 	if err = glfw.Init(); err != nil {
-		fmt.Fprintf(os.Stderr, "[e] %v\n", err)
+		log("[e] %v\n", err)
 		return
 	}
 
 	defer glfw.Terminate()
 
 	if err = glfw.OpenWindow(Width, Height, 8, 8, 8, 8, 0, 8, glfw.Windowed); err != nil {
-		fmt.Fprintf(os.Stderr, "[e] %v\n", err)
+		log("[e] %v\n", err)
 		return
 	}
 
@@ -62,7 +62,7 @@ func main() {
 			drawScene(scene)
 		}
 	} else {
-		fmt.Fprintf(os.Stderr, "Unable to load scene. Cause: %v", err)
+		log("Unable to load scene. Cause: %v", err)
 	}
 }
 
@@ -122,11 +122,6 @@ func renderMeshImmediate(m *Mesh) {
 
 // Render the mesh using OpenGL buffers
 func renderMeshWithBuff(m *Mesh) {
-	defer func() {
-		if info := recover(); info != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v", info)
-		}
-	}()
 	buff := CreateBufferFor(m)
 	if buff != nil {
 		defer buff.Dispose()
@@ -151,4 +146,8 @@ func drawScene(scene *Scene) {
 	quadAngle -= 0.15
 
 	glfw.SwapBuffers()
+}
+
+func log(msg string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, msg, args...)
 }

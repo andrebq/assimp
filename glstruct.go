@@ -18,12 +18,12 @@ func CreateBufferFor(m *Mesh) *VertexBuf {
 
 	vbuf.buf.Bind(gl.VERTEX_ARRAY_BUFFER_BINDING)
 	if gl.GetError() != 0 {
-		panic("Unable to bind the buffer")
+		log("Error binding vertex buffer. GL_CODE: %v", gl.GetError())
 	}
 
 	gl.BufferData(gl.VERTEX_ARRAY_BUFFER_BINDING, len(m.Vertices), &m.Vertices, gl.STATIC_DRAW)
 	if gl.GetError() != 0 {
-		panic("Unable to load buffer data")
+		log("Error writing buffer data. GL_CODE: %v", gl.GetError())
 	}
 
 	return vbuf
