@@ -11,9 +11,9 @@ package main
 import "C"
 
 import (
-	"unsafe"
 	"errors"
 	"fmt"
+	"unsafe"
 )
 
 // Convert a Scene from Assimp to a Go structure.
@@ -33,7 +33,7 @@ func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
 		gMesh := &Mesh{}
 		gScene.AddMesh(gMesh)
 		cMesh := (*C.struct_aiMesh)(C.aiw_read_mesh(cScene, C.uint(i)))
-		
+
 		// reading mesh vertices
 		gMesh.Vertices = make([]Vector3, cMesh.mNumVertices)
 		for i, _ := range gMesh.Vertices {
@@ -42,7 +42,7 @@ func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
 			gMesh.Vertices[i][1] = float64(cVector3d.y)
 			gMesh.Vertices[i][2] = float64(cVector3d.z)
 		}
-		
+
 		// reading mesh normals
 		if int(C.aiw_mesh_has_normals(cMesh)) == 1 {
 			gMesh.Normals = make([]Vector3, int(cMesh.mNumVertices))
@@ -53,12 +53,12 @@ func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
 				gMesh.Normals[i][2] = float64(cVector3d.z)
 			}
 		}
-		
+
 		// reading mesh faces
 		gMesh.Faces = make([]*Face, int(cMesh.mNumFaces))
 		for i, _ := range gMesh.Faces {
 			cFace := (*C.struct_aiFace)(C.aiw_read_face(cMesh, C.uint(i)))
-			gFace := &Face{Indices:make([]int, int(cFace.mNumIndices))}
+			gFace := &Face{Indices: make([]int, int(cFace.mNumIndices))}
 			for j, _ := range gFace.Indices {
 				gFace.Indices[j] = int(C.aiw_read_vec_index_from_face(cFace, C.uint(j)))
 			}
@@ -67,21 +67,21 @@ func convertAiMesh(gScene *Scene, scenePtr unsafe.Pointer) {
 	}
 }
 
-// Load the assent from the given path. 
+// Load the assent from the given path.
 //
 // All resources are dealocated before returning.
-func loadAsset(path string) (*Scene, error) {	
+func loadAsset(path string) (*Scene, error) {
 	var err error
 	cs := C.CString(path)
 	defer C.free(unsafe.Pointer(cs))
 	cScene := C.aiw_import_file(cs, C.aiProcessPreset_TargetRealtime_MaxQuality)
-	if (uintptr(unsafe.Pointer(cScene)) == 0) {
+	if uintptr(unsafe.Pointer(cScene)) == 0 {
 		err = errors.New(fmt.Sprintf("Unable to load %v.\n", path))
 		return nil, err
 	}
 	defer func() {
 		C.aiw_release_scene(cScene)
 	}()
-	
+
 	return convertAiScene(unsafe.Pointer(cScene)), nil
 }

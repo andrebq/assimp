@@ -13,12 +13,12 @@ const (
 	ErrMeshNotFound = Error("Unable to find the given mesh in the Scene")
 )
 
-// The Scene object, hold the root node of the scene and 
+// The Scene object, hold the root node of the scene and
 // the list of meshes
 type Scene struct {
 	// Root node of the scene
 	Root *Node
-	
+
 	// List of mesh
 	Mesh []*Mesh
 }
@@ -30,6 +30,7 @@ func (s *Scene) AddMesh(m *Mesh) {
 	} else {
 		s.Mesh = append(s.Mesh, m)
 	}
+	m.mid = len(s.Mesh)
 }
 
 // Index of the given mesh
@@ -48,7 +49,7 @@ func (s *Scene) IndexOfMesh(m *Mesh) (idx int, err error) {
 type Node struct {
 	// The list of index used by this node
 	Mesh []int
-	
+
 	// Child nodes
 	Childs []*Node
 }
@@ -62,7 +63,7 @@ func (n *Node) AddMeshIndex(i int) {
 }
 
 // Use the given mesh from the given scene
-func (n *Node) UseMesh(m *Mesh, s *Scene) (err error){
+func (n *Node) UseMesh(m *Mesh, s *Scene) (err error) {
 	var idx int
 	if idx, err = s.IndexOfMesh(m); err == nil {
 		n.AddMeshIndex(idx)
@@ -75,12 +76,25 @@ func (n *Node) UseMesh(m *Mesh, s *Scene) (err error){
 type Mesh struct {
 	// List of vertices
 	Vertices []Vector3
-	
+
 	// List of normals
 	Normals []Vector3
-	
+
+	// List of colors
+	Colors []Vector3
+
 	// List of faces
 	Faces []*Face
+
+	// Mesh id
+	mid int
+}
+
+// Represent the id of the given mesh in the given scene.
+//
+// This Id is valid only for Go and isn't loaded from the asset file
+func (m *Mesh) Id() int {
+	return m.mid
 }
 
 // Return true if the mesh has normal information
