@@ -16,6 +16,7 @@ import (
 
 	"math/rand"
 	"os"
+	"strings"
 )
 
 const (
@@ -150,4 +151,7 @@ func drawScene(scene *Scene) {
 
 func log(msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg, args...)
+	if !strings.HasSuffix(msg, "\n") || !strings.HasSuffix(msg, "\r\n") {
+		fmt.Fprintf(os.Stderr, "\n")
+	}
 }
