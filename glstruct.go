@@ -22,8 +22,14 @@ func CreateBufferFor(m *Mesh) *VertexBuf {
 		log("Error binding vertex buffer. GL_CODE: %v", err)
 		return nil
 	}
+	flat := make([]float64, len(m.Vertices) * 3)
+	for i, _ := range m.Vertices {
+		flat[3*i] = m.Vertices[i][0] // x
+		flat[3*i + 1] = m.Vertices[i][1] // y
+		flat[3*i + 2] = m.Vertices[i][2] // z
+	}
 
-	gl.BufferData(gl.VERTEX_ARRAY_BUFFER_BINDING, len(m.Vertices), &m.Vertices, gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(m.Vertices), flat, gl.STATIC_DRAW)
 	if gl.GetError() != 0 {
 		log("Error writing buffer data. GL_CODE: %v", gl.GetError())
 	}

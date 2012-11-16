@@ -139,9 +139,9 @@ func drawScene(scene *Scene) {
 	gl.Rotatef(quadAngle, 1, 0, 1)
 
 	for _, m := range scene.Mesh {
-		//renderMeshWithBuff(m)
+		renderMeshWithBuff(m)
 		// using vertex buffer isn't working right now
-		renderMeshImmediate(m)
+		//renderMeshImmediate(m)
 	}
 
 	quadAngle -= 0.15
