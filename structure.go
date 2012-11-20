@@ -1,6 +1,11 @@
 // This file contains the strucutres used in the program
 package assimp
 
+import (
+	"encoding/gob"
+	"io"
+)
+
 // Represent an error in the structure of a scene/node.
 type Error string
 
@@ -114,3 +119,18 @@ type Vector3 [3]float64
 
 // A 4d Vertex
 type Vector4 [4]float64
+
+// Write the scene using the gob format
+func WriteScene(w io.Writer, s *Scene) error {
+	enc := gob.NewEncoder(w)
+	err := enc.Encode(*s)
+	return err
+}
+
+// Read a scene stored using the gob format
+func ReadScene(r io.Reader) (*Scene, error) {
+	dec := gob.NewDecoder(r)
+	sc := &Scene{}
+	err := dec.Decode(sc)
+	return sc, err
+}
