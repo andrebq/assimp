@@ -114,10 +114,10 @@ type Face struct {
 	Indices []int
 }
 
-// A 3d Vertex
+// A 3D Vertex
 type Vector3 [3]float64
 
-// A 4d Vertex
+// A 4D Vertex
 type Vector4 [4]float64
 
 // Write the scene using the gob format
@@ -134,3 +134,102 @@ func ReadScene(r io.Reader) (*Scene, error) {
 	err := dec.Decode(sc)
 	return sc, err
 }
+
+// This structure is optimized to be used with
+// OpenGL. The vertex information is flat and can be passed
+// directly to OpenGL API.
+//
+// Vertex and Normals are 3 components (x,y,z)
+//
+// Colors are 4 components (r,g,b,a)
+//
+// Face index can be a list of: int8 or int16 or int (usually it's int16),
+// this is used to reduce the amount of data sent to the VRAM, the user
+// must check the value of index size to discover that property should be used
+//
+// 32 bit floats are used instead of 64 since most of the time 32 bit's have
+// enough space to hold most geometries
+type FlatMesh struct {
+	Vertex     []float32
+	Normal     []float32
+	Colors     []float32
+	ISize      IndexSize
+	ByteIndex  []byte
+	ShortIndex []int16
+	IntIndex   []int
+}
+
+// Return a flat representation of the given mesh
+func NewFlatMesh(m *Mesh) *FlatMesh {
+	fm := &FlatMesh{}
+	colorInfo := m.Colors != nil && len(m.Colors) > 0
+
+	fm.Vertex = make([]float32, len(m.Vertices)*3)
+	fm.Normal = make([]float32, len(fm.Vertex))
+	if colorInfo {
+		fm.Colors = make([]float32, len(m.Colors)*4)
+	}
+
+	icount := len(fm.Vertex) // the biggest vertex index is the largest value in the index array
+	if icount <= int(ByteSize) {
+		fm.ISize = ByteSize
+	} else if icount <= int(ShortSize) {
+		fm.ISize = ShortSize
+	} else {
+		fm.ISize = IntSize
+	}
+
+	for i, v := range m.Vertices {
+		fm.Vertex[i*3] = float32(v[0])
+		fm.Vertex[i*3+1] = float32(v[1])
+		fm.Vertex[i*3+2] = float32(v[2])
+
+		n := m.Normals[i]
+		fm.Normal[i*3] = float32(n[0])
+		fm.Normal[i*3+1] = float32(n[1])
+		fm.Normal[i*3+2] = float32(n[2])
+
+		if colorInfo {
+			c := m.Colors[i]
+			fm.Colors[i*3] = float32(c[0])
+			fm.Colors[i*3+1] = float32(c[1])
+			fm.Colors[i*3+2] = float32(c[2])
+			fm.Colors[i*3+3] = float32(c[3])
+		}
+	}
+	switch fm.ISize {
+	case ByteSize:
+		fm.ByteIndex = make([]byte, 0)
+	case ShortSize:
+		fm.ShortIndex = make([]int16, 0)
+	case IntSize:
+		fm.IntIndex = make([]int, 0)
+	}
+
+	for _, f := range m.Faces {
+		for _, i := range f.Indices {
+			switch fm.ISize {
+			case ByteSize:
+				fm.ByteIndex = append(fm.ByteIndex, byte(i))
+			case ShortSize:
+				fm.ShortIndex = append(fm.ShortIndex, int16(i))
+			case IntSize:
+				fm.IntIndex = append(fm.IntIndex, i)
+			}
+		}
+	}
+
+	return fm
+}
+
+// Size of the vertex index
+type IndexSize int
+
+const (
+	// All indexes are under 255
+	ByteSize IndexSize = 255
+	// All indexes are under 65536
+	ShortSize = 32767
+	// Fall back
+	IntSize = 2147483647
+)
