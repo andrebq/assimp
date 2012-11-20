@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"path/filepath"
+	"testing"
 )
 
 // Try to load a simple cube from a collada file

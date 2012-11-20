@@ -13,8 +13,8 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"unsafe"
 	"github.com/andrebq/assimp"
+	"unsafe"
 )
 
 // Convert a Scene from Assimp to a Go structure.

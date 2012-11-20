@@ -1,37 +1,83 @@
-// Open Asset Importer -> Sample OpenGL Viewer
-//
-// This is a sample application to check if cgo is capable of linking to Open Asset Importer (http://assimp.sourceforge.net/)
-//
-// The code here is basically a translation from the Sample_SimpleOpenGL.c
-//
-// You will need GLFW, GL and GLU installed.
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/andrebq/assimp"
+	"io"
 	"os"
 	"strings"
-	"github.com/andrebq/assimp"
+)
+
+var (
+	_if  = flag.String("if", "", "Input file")
+	_of  = flag.String("of", "-", "Output file")
+	help = flag.Bool("h", false, "Help")
 )
 
 func main() {
-	if scene, err := loadAsset("cube.dae"); err != nil {
-		log("Unable to load scene. Cause: %v", err)
+	flag.Parse()
+
+	if *help {
+		printUsage("")
+	}
+
+	if *_if == "" {
+		printUsage("The input file is required")
+	}
+	if scene, err := loadAsset(*_if); err != nil {
+		log("Unable to load scene.\nCause: %v", err)
 	} else {
-		dumpScene(scene)
+		dumpScene(scene, *_of)
 	}
 }
 
 // Dump a scene loaded from assimp to a gob file
 // this file can later be used to load resources into the game
 // or manipulated to a faster format.
-func dumpScene(s *assimp.Scene) {
-	// dummy method here
+func dumpScene(s *assimp.Scene, outpath string) {
+	w, err := openWriterFor(outpath)
+	if err != nil {
+		fatal("Error opening %v for write. Cause: %v", outpath, err)
+	}
+	if w, ok := w.(io.Closer); ok {
+		defer w.Close()
+	}
 }
 
+func openWriterFor(file string) (io.Writer, error) {
+	if file == "-" {
+		return os.Stdout, nil
+	} else {
+		f, err := os.Create(file)
+		if err != nil {
+			return nil, err
+		}
+		return f, err
+	}
+	panic("Not reached")
+	return nil, nil
+}
+
+// Just log some information
 func log(msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg, args...)
 	if !strings.HasSuffix(msg, "\n") || !strings.HasSuffix(msg, "\r\n") {
 		fmt.Fprintf(os.Stderr, "\n")
 	}
+}
+
+// just like log, but call's os.Exit(1) after
+func fatal(msg string, args ...interface{}) {
+	log(msg, args...)
+	os.Exit(1)
+}
+
+// print usage
+func printUsage(msg string) {
+	if msg != "" {
+		log(msg)
+	}
+	flag.Usage()
+	os.Exit(1)
 }
