@@ -152,7 +152,7 @@ func ReadScene(r io.Reader) (*Scene, error) {
 type FlatMesh struct {
 	Vertex     []float32
 	Normal     []float32
-	Colors     []float32
+	Color      []float32
 	ISize      IndexSize
 	ByteIndex  []byte
 	ShortIndex []int16
@@ -167,7 +167,7 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 	fm.Vertex = make([]float32, len(m.Vertices)*3)
 	fm.Normal = make([]float32, len(fm.Vertex))
 	if colorInfo {
-		fm.Colors = make([]float32, len(m.Colors)*4)
+		fm.Color = make([]float32, len(m.Colors)*4)
 	}
 
 	icount := len(fm.Vertex) // the biggest vertex index is the largest value in the index array
@@ -191,10 +191,10 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 
 		if colorInfo {
 			c := m.Colors[i]
-			fm.Colors[i*3] = float32(c[0])
-			fm.Colors[i*3+1] = float32(c[1])
-			fm.Colors[i*3+2] = float32(c[2])
-			fm.Colors[i*3+3] = float32(c[3])
+			fm.Color[i*4] = float32(c[0])
+			fm.Color[i*4+1] = float32(c[1])
+			fm.Color[i*4+2] = float32(c[2])
+			fm.Color[i*4+3] = float32(c[3])
 		}
 	}
 	switch fm.ISize {
