@@ -1,37 +1,10 @@
 package assimp
 
 import (
-	"bytes"
 	"math/rand"
 	"reflect"
 	"testing"
 )
-
-// Test the encoding/decoding of gob files
-func TestCodec(t *testing.T) {
-	sc := &Scene{}
-	mesh := &Mesh{}
-	v := Vector3{1, 1, 1}
-	mesh.Vertices = make([]Vector3, 0)
-	mesh.Vertices = append(mesh.Vertices, v)
-	sc.AddMesh(mesh)
-
-	buff := new(bytes.Buffer)
-	err := WriteScene(buff, sc)
-	if err != nil {
-		t.Fatalf("Error writing scene. %v", err)
-	}
-
-	buff = bytes.NewBuffer(buff.Bytes())
-
-	sc, err = ReadScene(buff)
-	if err != nil {
-		t.Fatalf("Error reading scene. %v", err)
-	}
-	if sc.Mesh[0].Vertices[0] != v {
-		t.Errorf("Expecting %v but got %v", v, sc.Mesh[0].Vertices[0])
-	}
-}
 
 // Test the conversion between Mesh and FlatMesh
 func TestFlatMesh(t *testing.T) {
