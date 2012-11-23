@@ -1,5 +1,5 @@
 // Hold the routines used to convert from C structures to the Go ones
-package main
+package conv
 
 // #cgo pkg-config: assimp
 // #include <assimp/scene.h>
@@ -71,7 +71,7 @@ func convertAiMesh(gScene *assimp.Scene, scenePtr unsafe.Pointer) {
 // Load the assent from the given path.
 //
 // All resources are dealocated before returning.
-func loadAsset(path string) (*assimp.Scene, error) {
+func LoadAsset(path string) (*assimp.Scene, error) {
 	var err error
 	cs := C.CString(path)
 	defer C.free(unsafe.Pointer(cs))

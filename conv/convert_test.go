@@ -1,4 +1,4 @@
-package main
+package conv
 
 import (
 	"path/filepath"
@@ -8,7 +8,7 @@ import (
 // Try to load a simple cube from a collada file
 func TestCubeDae(t *testing.T) {
 	assetName := filepath.Join(filepath.FromSlash("../data/"), "cube.dae")
-	gScene, err := loadAsset(assetName)
+	gScene, err := LoadAsset(assetName)
 	if err != nil {
 		t.Fatalf("Unable to load %v. Cause %v", assetName, err)
 	}
