@@ -1,6 +1,10 @@
 // This file contains the strucutres used in the program
 package assimp
 
+import (
+	"math/rand"
+)
+
 // Represent an error in the structure of a scene/node.
 type Error string
 
@@ -200,6 +204,22 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 	}
 
 	return fm
+}
+
+// Just fill the mesh color array with some random colors
+func RandomColor(m *Mesh) {
+	if len(m.Colors) == 0 {
+		m.Colors = make([]Vector4, len(m.Vertices))
+	}
+
+	for i, _ := range m.Colors {
+		m.Colors[i] = Vector4{
+			rand.Float64(),
+			rand.Float64(),
+			rand.Float64(),
+			1, // 100% opacity
+		}
+	}
 }
 
 // Size of the vertex index
