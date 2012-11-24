@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/andrebq/assimp"
+	"github.com/andrebq/assimp/conv"
 	"io"
 	"os"
 	"strings"
@@ -25,7 +26,7 @@ func main() {
 	if *_if == "" {
 		printUsage("The input file is required")
 	}
-	if scene, err := loadAsset(*_if); err != nil {
+	if scene, err := conv.LoadAsset(*_if); err != nil {
 		log("Unable to load scene.\nCause: %v", err)
 	} else {
 		dumpScene(scene, *_of)
