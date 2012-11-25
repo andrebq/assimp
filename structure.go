@@ -140,13 +140,10 @@ type Vector4 [4]float64
 // 32 bit floats are used instead of 64 since most of the time 32 bit's have
 // enough space to hold most geometries
 type FlatMesh struct {
-	Vertex     []float32
-	Normal     []float32
-	Color      []float32
-	ISize      IndexSize
-	ByteIndex  []byte
-	ShortIndex []int16
-	IntIndex   []int
+	Vertex []float32
+	Normal []float32
+	Color  []float32
+	Index  []uint32
 }
 
 // Return a flat representation of the given mesh
@@ -158,15 +155,6 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 	fm.Normal = make([]float32, len(fm.Vertex))
 	if colorInfo {
 		fm.Color = make([]float32, len(m.Colors)*4)
-	}
-
-	icount := len(fm.Vertex) // the biggest vertex index is the largest value in the index array
-	if icount <= int(ByteSize) {
-		fm.ISize = ByteSize
-	} else if icount <= int(ShortSize) {
-		fm.ISize = ShortSize
-	} else {
-		fm.ISize = IntSize
 	}
 
 	for i, v := range m.Vertices {
@@ -187,44 +175,39 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 			fm.Color[i*4+3] = float32(c[3])
 		}
 	}
-	switch fm.ISize {
-	case ByteSize:
-		fm.ByteIndex = make([]byte, 0)
-	case ShortSize:
-		fm.ShortIndex = make([]int16, 0)
-	case IntSize:
-		fm.IntIndex = make([]int, 0)
-	}
 
+	fm.Index = make([]uint32, 0)
 	for _, f := range m.Faces {
 		for _, i := range f.Indices {
-			switch fm.ISize {
-			case ByteSize:
-				fm.ByteIndex = append(fm.ByteIndex, byte(i))
-			case ShortSize:
-				fm.ShortIndex = append(fm.ShortIndex, int16(i))
-			case IntSize:
-				fm.IntIndex = append(fm.IntIndex, i)
-			}
+			fm.Index = append(fm.Index, uint32(i))
 		}
 	}
 
 	return fm
 }
 
-// This function just return the index structure for the given mesh
-//
-// The returned value is on of: fm.ByteIndex, fm.ShortIndex, fm.IntIndex the actual return value depends on the size of the mesh.
-func (fm *FlatMesh) IndexVec() interface{} {
-	switch fm.ISize {
+func (fm *FlatMesh) FillIndexArray(size IndexSize) interface{} {
+	switch size {
 	case ByteSize:
-		return fm.ByteIndex
+		out := make([]byte, len(fm.Index))
+		for i, _ := range out {
+			out[i] = byte(fm.Index[i])
+		}
+		return out
 	case ShortSize:
-		return fm.ShortIndex
+		out := make([]uint16, len(fm.Index))
+		for i, _ := range out {
+			out[i] = uint16(fm.Index[i])
+		}
+		return out
 	case IntSize:
-		return fm.IntIndex
+		out := make([]uint32, len(fm.Index))
+		// better copy to keep consistent with the other options
+		for i, _ := range out {
+			out[i] = fm.Index[i]
+		}
+		return out
 	}
-	panic("not reached")
 	return nil
 }
 

@@ -1,4 +1,5 @@
 package assimp
+
 /*Copyright (c) 2012 André Luiz Alves Moraes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -60,16 +61,16 @@ func TestFlatMesh(t *testing.T) {
 	}
 	m.Faces = make([]*Face, 0)
 
-	expIdx := make([]byte, 0)
+	expIdx := make([]uint32, 0)
 	for i := 0; i < 100; i++ {
 		f := &Face{make([]int, 3)}
 		f.Indices[0] = rand.Int() % len(m.Vertices)
 		f.Indices[1] = rand.Int() % len(m.Vertices)
 		f.Indices[2] = rand.Int() % len(m.Vertices)
 
-		expIdx = append(expIdx, byte(f.Indices[0]))
-		expIdx = append(expIdx, byte(f.Indices[1]))
-		expIdx = append(expIdx, byte(f.Indices[2]))
+		expIdx = append(expIdx, uint32(f.Indices[0]))
+		expIdx = append(expIdx, uint32(f.Indices[1]))
+		expIdx = append(expIdx, uint32(f.Indices[2]))
 
 		m.Faces = append(m.Faces, f)
 	}
@@ -96,13 +97,7 @@ func TestFlatMesh(t *testing.T) {
 		}
 	}
 
-	if !reflect.DeepEqual(fm.ByteIndex, expIdx) {
+	if !reflect.DeepEqual(fm.Index, expIdx) {
 		t.Errorf("Index array is different")
-	}
-
-	val := fm.IndexVec()
-	if _, ok := val.([]byte); !ok {
-		t.Logf("Type of: %v", reflect.TypeOf(fm.IndexVec()))
-		t.Errorf("IndexVec should return a []byte")
 	}
 }
