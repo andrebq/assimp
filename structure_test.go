@@ -94,4 +94,10 @@ func TestFlatMesh(t *testing.T) {
 	if !reflect.DeepEqual(fm.ByteIndex, expIdx) {
 		t.Errorf("Index array is different")
 	}
+
+	val := fm.IndexVec()
+	if _, ok := val.([]byte); !ok {
+		t.Logf("Type of: %v", reflect.TypeOf(fm.IndexVec()))
+		t.Errorf("IndexVec should return a []byte")
+	}
 }

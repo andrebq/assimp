@@ -206,6 +206,22 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 	return fm
 }
 
+// This function just return the index structure for the given mesh
+//
+// The returned value is on of: fm.ByteIndex, fm.ShortIndex, fm.IntIndex the actual return value depends on the size of the mesh.
+func (fm *FlatMesh) IndexVec() interface{} {
+	switch fm.ISize {
+	case ByteSize:
+		return fm.ByteIndex
+	case ShortSize:
+		return fm.ShortIndex
+	case IntSize:
+		return fm.IntIndex
+	}
+	panic("not reached")
+	return nil
+}
+
 // Just fill the mesh color array with some random colors
 func RandomColor(m *Mesh) {
 	if len(m.Colors) == 0 {
