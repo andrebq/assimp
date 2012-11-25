@@ -16,7 +16,7 @@ You can use your 3D models in two ways:
 
 # Do you have any samples?
 
-You can read the unit tests for each package to see how the API is used or you can look at [[https://github.com/andrebq/exp]] and see a 3d application that can display your models (the application is limited to small models at this moment.)
+You can read the unit tests for each package to see how the API is used or you can look at https://github.com/andrebq/exp and see a 3d application that can display your models (the application is limited to small models at this moment.)
 
 # Can I help?
 
