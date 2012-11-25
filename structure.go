@@ -186,6 +186,10 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 	return fm
 }
 
+// Return a copy of the mesh index array with elements of the size informed.
+//
+// No overflow is checked, so if you request the ByteSize and there are indexes with values greater than
+// 255, the value will be truncated and the mesh will be deformed.
 func (fm *FlatMesh) FillIndexArray(size IndexSize) interface{} {
 	switch size {
 	case ByteSize:
