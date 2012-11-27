@@ -61,6 +61,19 @@ func convertAiMesh(gScene *assimp.Scene, scenePtr unsafe.Pointer) {
 			}
 		}
 
+		if C.aiw_has_colors(cMesh, C.uint(0)) > 0 {
+			gMesh.Colors = make([]assimp.Vector4, int(cMesh.mNumVertices))
+			for i, _ := range gMesh.Colors {
+				cColor := C.aiw_read_color(cMesh, C.uint(0), C.uint(i))
+				gMesh.Colors[i] = assimp.Vector4{
+					float64(cColor.r),
+					float64(cColor.g),
+					float64(cColor.b),
+					float64(cColor.a),
+				}
+			}
+		}
+
 		// reading mesh faces
 		gMesh.Faces = make([]*assimp.Face, int(cMesh.mNumFaces))
 		for i, _ := range gMesh.Faces {

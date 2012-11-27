@@ -1,7 +1,4 @@
 #include "aiw_helper.h"
-#include <assimp/scene.h>
-#include <assimp/mesh.h>
-#include <assimp/vector3.h>
 #include <assimp/cimport.h>
 #include <assimp/postprocess.h>
 #include <stdlib.h>
@@ -16,6 +13,26 @@ struct aiVector3D* aiw_read_vec(struct aiMesh* m, unsigned int index)
 struct aiVector3D* aiw_read_norm(struct aiMesh* m, unsigned int index)
 {
 	return &(m->mNormals[index]);
+}
+
+// return the color at the given colorset/index
+//
+// Note that each colorset have N colors (where N is the number of vertex in the mesh)
+struct aiw_color4d aiw_read_color(struct aiMesh* m, unsigned int colorset, unsigned int idx)
+{
+	C_STRUCT aiColor4D color = m->mColors[colorset][idx];
+	struct aiw_color4d ret = { color.r, color.g, color.b, color.a };
+	return ret;
+}
+
+// Check if the mesh have colors in the given colorset
+int aiw_has_colors(struct aiMesh* m, unsigned int colorset)
+{
+	if (m->mColors[colorset] != NULL) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 // return 1 if the mesh has normals and 0 if not
