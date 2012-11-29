@@ -8,10 +8,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.*/
 
 // #cgo pkg-config: assimp
-// #include <assimp/scene.h>
-// #include <assimp/cimport.h>
-// #include <assimp/postprocess.h>
-// #include <assimp/vector3.h>
 // #include <stdlib.h>
 // #include "aiw_helper.h"
 import "C"
@@ -94,7 +90,7 @@ func LoadAsset(path string) (*assimp.Scene, error) {
 	var err error
 	cs := C.CString(path)
 	defer C.free(unsafe.Pointer(cs))
-	cScene := C.aiw_import_file(cs, C.aiProcessPreset_TargetRealtime_MaxQuality)
+	cScene := C.aiw_import_file(cs)
 	if uintptr(unsafe.Pointer(cScene)) == 0 {
 		err = errors.New(fmt.Sprintf("Unable to load %v.\n", path))
 		return nil, err
