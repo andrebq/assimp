@@ -96,6 +96,9 @@ type Mesh struct {
 	// List of faces
 	Faces []*Face
 
+	// List of UV Coordinates (at this point, only one texture for each mesh)
+	UVCoords []Vector2
+
 	// Mesh id
 	mid int
 }
@@ -125,6 +128,9 @@ type Vector3 [3]float64
 // A 4D Vertex
 type Vector4 [4]float64
 
+// A 2D Vertex
+type Vector2 [2]float64
+
 // This structure is optimized to be used with
 // OpenGL. The vertex information is flat and can be passed
 // directly to OpenGL API.
@@ -140,21 +146,26 @@ type Vector4 [4]float64
 // 32 bit floats are used instead of 64 since most of the time 32 bit's have
 // enough space to hold most geometries
 type FlatMesh struct {
-	Vertex []float32
-	Normal []float32
-	Color  []float32
-	Index  []uint32
+	Vertex  []float32
+	Normal  []float32
+	Color   []float32
+	Texture []float32
+	Index   []uint32
 }
 
 // Return a flat representation of the given mesh
 func NewFlatMesh(m *Mesh) *FlatMesh {
 	fm := &FlatMesh{}
 	colorInfo := m.Colors != nil && len(m.Colors) > 0
+	texInfo := m.UVCoords != nil && len(m.UVCoords) > 0
 
 	fm.Vertex = make([]float32, len(m.Vertices)*3)
 	fm.Normal = make([]float32, len(fm.Vertex))
 	if colorInfo {
 		fm.Color = make([]float32, len(m.Colors)*4)
+	}
+	if texInfo {
+		fm.Texture = make([]float32, len(m.UVCoords)*2)
 	}
 
 	for i, v := range m.Vertices {
@@ -173,6 +184,12 @@ func NewFlatMesh(m *Mesh) *FlatMesh {
 			fm.Color[i*4+1] = float32(c[1])
 			fm.Color[i*4+2] = float32(c[2])
 			fm.Color[i*4+3] = float32(c[3])
+		}
+
+		if texInfo {
+			t := m.UVCoords[i]
+			fm.Texture[i*2] = float32(t[0])
+			fm.Texture[i*2+1] = float32(t[1])
 		}
 	}
 
@@ -207,9 +224,7 @@ func (fm *FlatMesh) FillIndexArray(size IndexSize) interface{} {
 	case IntSize:
 		out := make([]uint32, len(fm.Index))
 		// better copy to keep consistent with the other options
-		for i, _ := range out {
-			out[i] = fm.Index[i]
-		}
+		copy(out, fm.Index)
 		return out
 	}
 	return nil

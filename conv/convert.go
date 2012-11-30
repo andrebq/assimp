@@ -70,6 +70,17 @@ func convertAiMesh(gScene *assimp.Scene, scenePtr unsafe.Pointer) {
 			}
 		}
 
+		if C.aiw_has_texture_at(cMesh, C.uint(0)) > 0 {
+			gMesh.UVCoords = make([]assimp.Vector2, int(cMesh.mNumVertices))
+			for i, _ := range gMesh.UVCoords {
+				cCoord := C.aiw_read_texture_at(cMesh, C.uint(0), C.uint(i))
+				gMesh.UVCoords[i] = assimp.Vector2{
+					float64(cCoord.x),
+					float64(cCoord.y),
+				}
+			}
+		}
+
 		// reading mesh faces
 		gMesh.Faces = make([]*assimp.Face, int(cMesh.mNumFaces))
 		for i, _ := range gMesh.Faces {

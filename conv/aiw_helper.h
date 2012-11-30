@@ -3,5 +3,6 @@
 
 #include "aiw_scene_helper.h"
 #include "aiw_vertex_helper.h"
+#include "aiw_tex_helper.h"
 
 #endif
