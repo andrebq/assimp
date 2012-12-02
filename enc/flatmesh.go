@@ -14,10 +14,37 @@ import (
 	"encoding/binary"
 	"github.com/andrebq/assimp"
 	"io"
+	"math"
 )
+
+// normalize a float32 value to a byte one, the val is expected to be normalized, ie, between [0, 1]
+func float32ToByte(val float32) byte {
+	if val > 1 {
+		val = 1
+	} else if val < 0 {
+		val = 0
+	}
+	return byte(math.Floor(float64(val * 255)))
+}
 
 // Read at most len(out) float32 values from the given reader
 func readFloat32Array(out []float32, r io.Reader) error {
+	err := binary.Read(r, binary.BigEndian, &out)
+	return err
+}
+
+// Write the float array (including it's size) to the writer.
+func writeFloat32Array(w io.Writer, in []float32) error {
+	err := writeSize(w, int32(len(in)))
+	if err != nil {
+		return err
+	}
+	err = binary.Write(w, binary.BigEndian, in)
+	return err
+}
+
+// Read a list of uint 32 values
+func readUInt32Array(out []uint32, r io.Reader) error {
 	err := binary.Read(r, binary.BigEndian, &out)
 	return err
 }
@@ -29,9 +56,9 @@ func readSize(r io.Reader) (int32, error) {
 	return sz, err
 }
 
-// Read a list of uint 32 values
-func readUInt32Array(out []uint32, r io.Reader) error {
-	err := binary.Read(r, binary.BigEndian, &out)
+// Write the size of the next value
+func writeSize(w io.Writer, sz int32) error {
+	err := binary.Write(w, binary.BigEndian, sz)
 	return err
 }
 
@@ -160,6 +187,34 @@ func (f *FlatMeshCodec) readColorData(r io.Reader) error {
 		f.mesh.Color[i+3] = float32(colors[i+3]) / 255
 	}
 
+	return err
+}
+
+// Write the vertex information to the output
+func (f *FlatMeshCodec) writeVertexData(w io.Writer) error {
+	err := writeFloat32Array(w, f.mesh.Vertex)
+	return err
+}
+
+// Write the normal information
+func (f *FlatMeshCodec) writeNormalData(w io.Writer) error {
+	err := writeFloat32Array(w, f.mesh.Normal)
+	return err
+}
+
+// Write the color information
+func (f *FlatMeshCodec) writeColorData(w io.Writer) error {
+	colorBytes := f.memAlloc.AllocByte(int32(len(f.mesh.Color)))
+	defer f.memAlloc.Recycle(colorBytes)
+	err := writeSize(w, int32(len(colorBytes)/4)) // 4 colors = 1 word (32 bits)
+	for i := 0; i < len(f.mesh.Color); i += 4 {
+		//color format is: rgba8888
+		colorBytes[i] = float32ToByte(f.mesh.Color[i])
+		colorBytes[i+1] = float32ToByte(f.mesh.Color[i+1])
+		colorBytes[i+2] = float32ToByte(f.mesh.Color[i+2])
+		colorBytes[i+3] = float32ToByte(f.mesh.Color[i+3])
+	}
+	_, err = w.Write(colorBytes)
 	return err
 }
 
