@@ -1,4 +1,4 @@
-package main
+package enc
 
 /*Copyright (c) 2012 André Luiz Alves Moraes
 
@@ -21,7 +21,7 @@ func (e Error) Error() string {
 
 // most common error
 const (
-	UnexpectedEOF = Error("Unexpected end-of-file")
-	ZeroOrInvalidSize = Error("Zero or invalid size of data")
+	UnexpectedEOF         = Error("Unexpected end-of-file")
+	ZeroOrInvalidSize     = Error("Zero or invalid size of data")
 	VertexSizeIsDifferent = Error("Size from file incompatible with vertex count")
 )
